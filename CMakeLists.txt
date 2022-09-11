@@ -9,6 +9,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(Messenger main.cpp)
 
+set(COMMON_FILES
+        "Common/Header/CommunicationUnit.h"
+        "Common/Header/Core.h"
+        "Common/Header/Connection.h"
+        "Common/Source/CommunicationUnit.cpp"
+        )
+add_subdirectory(Server)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
