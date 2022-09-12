@@ -5,7 +5,7 @@ set(TARGET_NAME Messenger)
 
 project(${TARGET_NAME})
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Messenger main.cpp)
 

@@ -22,6 +22,12 @@ public:
     explicit CommunicationUnit(uint16_t port, uint32_t host = INADDR_ANY);
     void SetSocket(Socket sock);
     void CloseSocket();
+    void SetConnectionStatus(Connection connection);
+    Connection GetConnectionStatus() const;
+    Socket& GetSocket();
+    virtual int Disconnect();
+    virtual void LoadData();
+    void SendMsg(std::string_view msg);
     void Clear();
     [[nodiscard]] uint16_t GetPort() const;
     [[nodiscard]] uint32_t GetHost() const;
@@ -30,5 +36,5 @@ protected:
     Socket m_sock;
     SockAddr_in addr;
 private:
-    Connection con;
+    Connection con {} ;
 };

@@ -7,17 +7,17 @@
 #include <atomic>
 #include "../Common/Header/CommunicationUnit.h"
 
-namespace IServer {
+namespace TCP {
 
     using ServerInfo = CommunicationUnit;
-    using ConnectionsList = std::list<std::unique_ptr<CommunicationUnit>>;
+    using ConnectionsList = std::list<std::shared_ptr<CommunicationUnit>>;
 
     enum class KeepAlive {
         TRUE,
         FALSE
     };
 
-// we will inher from IServer, we need to have incapsulaated server info
+// we will inher from TCP, we need to have incapsulaated server info
     class IServer {
     private:
         // Server info

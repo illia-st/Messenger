@@ -1,6 +1,6 @@
 #include "../Header/IServer.h"
 
-namespace IServer {
+namespace TCP {
     IServer::IServer(uint16_t port, KeepAlive if_live) {
         alive = if_live;
         info = ServerInfo(port);

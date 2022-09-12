@@ -16,6 +16,7 @@ CommunicationUnit::CommunicationUnit(uint16_t port, uint32_t host) {
 void CommunicationUnit::CloseSocket() {
     close(m_sock);
     m_sock = -1;
+    con = Connection::CLOSED;
 }
 #endif
 void CommunicationUnit::SetSocket(Socket sock) {
@@ -38,3 +39,13 @@ uint32_t CommunicationUnit::GetHost() const {
 std::string CommunicationUnit::GetIP() const{
     return std::move(std::string((inet_ntoa(addr.sin_addr))));
 }
+
+void CommunicationUnit::SetConnectionStatus(Connection connection) {
+    con = connection;
+}
+
+Connection CommunicationUnit::GetConnectionStatus() const {
+    return con;
+}
+
+Socket &CommunicationUnit::GetSocket() {return m_sock;}
