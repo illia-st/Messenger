@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Messenger main.cpp)
 
+target_link_libraries(Messenger Server)
+
 set(COMMON_FILES
         "Common/Header/CommunicationUnit.h"
         "Common/Header/Core.h"

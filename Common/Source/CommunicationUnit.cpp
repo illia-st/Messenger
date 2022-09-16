@@ -1,4 +1,5 @@
 #include "../Header/CommunicationUnit.h"
+#include <iostream>
 
 namespace TCP {
 #ifdef WIN32
@@ -9,9 +10,11 @@ namespace TCP {
     }
 
     CommunicationUnit::CommunicationUnit(uint16_t port, uint32_t host) {
+        addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
         if (host == INADDR_ANY) {
             addr.sin_addr.s_addr = INADDR_ANY;
+            return;
         }
         addr.sin_addr.s_addr = ntohl(host);
     }
@@ -24,15 +27,24 @@ namespace TCP {
 
     HiddenBuffer<>* CommunicationUnit::LoadData() {
         char * buf = new char[MaxBufferSize]{};
-        int ans = recv(this->GetSocket(), buf, MaxBufferSize, 0);
-        if(ans == 0){
+        int ans = recv(this->GetSocket(), buf, MaxBufferSize, MSG_DONTWAIT);
+//        std::cout << ans << std::endl;
+        if(ans == -1){
+            delete [] buf;
             return nullptr;
         }
+//        for(size_t i{}; i < 10; ++i){
+//            std::cout << buf[i] << " ";
+//        }
+//        std::cout << std::endl;
+        std::cout << "Something was accepted" << std::endl;
         auto BufferPtr {reinterpret_cast<HiddenBuffer<>*>(buf)};
-
-        if(ans == -1){
+        if(ans == 0){
+            std::cout << "Giving a hundred" << std::endl;
             BufferPtr->SetFlag(100);
         }
+        BufferPtr->SetSize(ans);
+//        std::cout << BufferPtr->GetFlag() << std::endl;
         return BufferPtr;
     }
 
@@ -83,4 +95,6 @@ namespace TCP {
     }
 
     Socket &CommunicationUnit::GetSocket() { return m_sock; }
+
+    SockAddr_in &CommunicationUnit::GetData() {return addr;}
 }

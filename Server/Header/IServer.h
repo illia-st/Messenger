@@ -5,20 +5,25 @@
 #include <list>
 #include <memory>
 #include <atomic>
+#include <forward_list>
 #include "../../Common/Header/CommunicationUnit.h"
 
 namespace TCP {
 
     using ServerInfo = CommunicationUnit;
-    using ConnectionsList = std::list<std::shared_ptr<CommunicationUnit>>;
+    using ConnectionsList = std::forward_list<std::shared_ptr<CommunicationUnit>>;
 
     enum class KeepAlive {
         TRUE,
         FALSE
     };
 
+    class IServer;
+
+    class Server;
+}
 // we will inher from TCP, we need to have incapsulaated server info
-    class IServer {
+    class TCP::IServer {
     protected:
         // I don't think that serv info needs synchro because
         // it will be only read during server's work
@@ -41,7 +46,7 @@ namespace TCP {
     public:
         IServer();
 
-        virtual ~IServer();
+        virtual ~IServer() = 0;
         explicit IServer(uint16_t port, KeepAlive if_live = KeepAlive::FALSE);
 
         virtual void SetNewPort(uint16_t port) = 0;
@@ -58,4 +63,3 @@ namespace TCP {
         ServerInfo info;
         ConnectionsList connections;
     };
-}

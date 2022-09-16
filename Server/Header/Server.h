@@ -5,14 +5,14 @@
 #include <iostream>
 #include "IServer.h"
 
-namespace TCP {
 #ifdef WIN32
 
 #else
 
-    class Server : public IServer {
+class TCP::Server : public TCP::IServer {
     public:
         Server();
+        ~Server() = default;
         explicit Server(uint16_t port, KeepAlive if_live = KeepAlive::FALSE);
         void SetNewPort(uint16_t port) override;
         int StartServer() override;
@@ -28,5 +28,4 @@ namespace TCP {
     };
 
 #endif
-}
 

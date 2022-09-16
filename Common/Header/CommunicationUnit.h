@@ -46,7 +46,7 @@ namespace TCP {
         [[nodiscard]] uint32_t GetHost() const;
 
         [[nodiscard]] std::string GetIP() const;
-
+        SockAddr_in& GetData();
     protected:
 
         void Clear();
