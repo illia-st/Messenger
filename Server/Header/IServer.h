@@ -5,7 +5,7 @@
 #include <list>
 #include <memory>
 #include <atomic>
-#include "../Common/Header/CommunicationUnit.h"
+#include "../../Common/Header/CommunicationUnit.h"
 
 namespace TCP {
 
@@ -19,12 +19,6 @@ namespace TCP {
 
 // we will inher from TCP, we need to have incapsulaated server info
     class IServer {
-    private:
-        // Server info
-//    using Client_Info = CommunicationUnit;
-        std::atomic<KeepAlive> alive{KeepAlive::FALSE};
-        ServerInfo info;
-        ConnectionsList connections;
     protected:
         // I don't think that serv info needs synchro because
         // it will be only read during server's work
@@ -45,16 +39,23 @@ namespace TCP {
         virtual void LoadData() = 0;
 
     public:
-        IServer() = default;
+        IServer();
 
+        virtual ~IServer();
         explicit IServer(uint16_t port, KeepAlive if_live = KeepAlive::FALSE);
 
-        virtual void SetNewPort(uint16_t) = 0;
+        virtual void SetNewPort(uint16_t port) = 0;
 
         [[nodiscard]] uint16_t GetPort() const;
 
         virtual int StartServer() = 0;
 
         virtual int StopServer() = 0;
+    private:
+        // Server info
+//    using Client_Info = CommunicationUnit;
+        std::atomic<KeepAlive> alive{KeepAlive::FALSE};
+        ServerInfo info;
+        ConnectionsList connections;
     };
 }

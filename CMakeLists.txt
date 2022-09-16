@@ -12,6 +12,7 @@ add_executable(Messenger main.cpp)
 set(COMMON_FILES
         "Common/Header/CommunicationUnit.h"
         "Common/Header/Core.h"
+        "Common/Header/Buffer.h"
         "Common/Header/Connection.h"
         "Common/Source/CommunicationUnit.cpp"
         )

@@ -1,8 +1,18 @@
 #include "../Header/Server.h"
 namespace TCP {
+    namespace {
+        void printMsg(const char * arr, size_t N){
+            for(size_t i{}; i < N; ++i){
+                std::cout << arr[i];
+            }
+            std::cout << std::endl;
+        }
+    }
 #ifdef WIN32
 
 #else
+    Server::Server(): IServer() {}
+    Server::Server(uint16_t port,KeepAlive if_live): IServer(port, if_live) {}
     int Server::StartServer() {
         Socket sock = socket(AF_INET, SOCK_STREAM|SOCK_NONBLOCK, 0);
         if(sock == -1){
@@ -48,25 +58,26 @@ namespace TCP {
             std::this_thread::sleep_for(100ms);
             std::scoped_lock lock(client_mutex);
             ConnectionsList& cons {this->GetConnections()};
+
             for(auto unit {cons.begin()}; unit != cons.end(); ){
-                auto client {dynamic_cast<ClientUnit*>(unit->get())};
-                if(client != nullptr){
-                    client->LoadData();
-                    if(client->GetConnectionStatus() == Connection::CLOSED){
-                        unit = cons.erase(unit);
-                        continue;
-                    }
-                    std::string_view msg {client->GetIP() + ":" + std::to_string(client->GetPort()) + "> " + std::string(client->GetLastMsg())};
-                    std::cout << msg;
-                    std::this_thread::get_id();
-                    SendAllFrom(*unit, msg, std::this_thread::get_id());
+//                auto client {dynamic_cast<ClientUnit*>(unit->get())};
+                auto client {unit->get()};
+                auto result {client->LoadData()};
+                if(result == nullptr){
+                    client->Disconnect();
+                    unit = cons.erase(unit);
+                    continue;
                 }
-                else {
-                    (*unit)->LoadData();
-                    if((*unit)->GetConnectionStatus() == Connection::CLOSED){
-                        unit = cons.erase(unit);
-                        continue;
+                switch(static_cast<Flag>(result->GetFlag())){
+                    case Flag::DefaultMsg:{
+                        printMsg(result->GetInfo(), result->GetSize());
+                        break;
                     }
+                    case Flag::MessengerMsg:{
+                        break;
+                    }
+                    default:
+                        printMsg(result->GetInfo(), result->GetSize());
                 }
                 ++unit;
             }
@@ -76,7 +87,7 @@ namespace TCP {
         while(this->GetInfo().GetConnectionStatus() == Connection::OPENED) {
             SockAddr_in address;
             memset(&address, 0, sizeof(address));
-            // check if it is non-blocking because non block flag is set
+            // check if it is non-blocking because non block m_flag is set
             Socket client_socket{accept(this->GetInfo().GetSocket(),
                                         reinterpret_cast<sockaddr *>(&address), nullptr)};
             if (this->GetInfo().GetConnectionStatus() != Connection::OPENED) {
@@ -88,33 +99,15 @@ namespace TCP {
                 continue;
             }
             std::shared_ptr<CommunicationUnit> unit(
-                    std::make_shared<CommunicationUnit>(ClientUnit(ntohs(address.sin_port),
+                    std::make_shared<CommunicationUnit>(CommunicationUnit(ntohs(address.sin_port),
                                                                    ntohl(address.sin_addr.s_addr))));
             std::scoped_lock lock(client_mutex);
             GetConnections().push_back(std::move(unit));
         }
     }
 
-    void Server::SendAllFrom(ClientUnit* ptr, std::string_view msg, const std::thread::id& t_id) {
-        if(t_id != data_loader.get_id()){
-            client_mutex.lock();
-        }
-
-        ConnectionsList& cons {this->GetConnections()};
-
-        for(auto unit {cons.begin()}; unit != cons.end(); ){
-            auto client = dynamic_cast<ClientUnit*>(unit->get());
-            if(client == nullptr || *client == *ptr) continue;
-            unit->get()->SendMsg(msg);
-        }
-        if(t_id != data_loader.get_id()){
-            client_mutex.unlock();
-        }
-    }
-
 #endif
-    Server::Server(): IServer() {}
-    Server::Server(uint16_t port): IServer(port) {}
+
     // Set New port I will implement after Start and Stop
     ConnectionsList &Server::GetConnections() {
         std::scoped_lock lock(client_mutex);
@@ -125,4 +118,5 @@ namespace TCP {
         std::scoped_lock lock(const_cast<Server*>(this)->client_mutex);
         return IServer::GetConnections();
     }
+    void Server::SetNewPort(uint16_t port) {std::cout << "Later" << std::endl;}
 }

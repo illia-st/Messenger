@@ -1,11 +1,12 @@
 #include "../Header/IServer.h"
 
 namespace TCP {
+    IServer::IServer(): info(ServerInfo()), connections(){}
     IServer::IServer(uint16_t port, KeepAlive if_live) {
         alive = if_live;
         info = ServerInfo(port);
     }
-
+    IServer::~IServer(){connections.clear();}
     const ConnectionsList &IServer::GetConnections() const {
         return connections;
     }
