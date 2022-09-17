@@ -1,3 +1,4 @@
+
 #include "../Header/Server.h"
 
     namespace {
@@ -32,6 +33,7 @@
             int error = errno;
             return error;
         }
+        fcntl(sock, F_SETFL, fcntl(sock, F_GETFL)|O_NONBLOCK);
         this->GetInfo().SetSocket(sock);// Connection Status is automatically updated
         // run connection acceptor
         acceptor = std::thread(&Server::AccessingNewConnections, this);
@@ -40,18 +42,23 @@
         return 1;
     }
     int TCP::Server::StopServer() {
+        std::cout << "I am stopping the server" << std::endl;
         if(this->GetInfo().GetConnectionStatus() == Connection::CLOSED){
             return 1;
         }
         this->GetInfo().SetConnectionStatus(Connection::CLOSED);
+        std::cout << "The status is set" << std::endl;
         for(auto& clients: GetConnections()){
             if(clients->Disconnect() != 1){
                 // make log about error
             }
         }
         GetConnections().clear();
+        std::cout << "All the clients are disconnected now. Proof " << GetConnections().size() << std::endl;
+        this->GetInfo().CloseSocket();
         acceptor.join();
         data_loader.join();
+        std::cout << "Threads are being joined now" << std::endl;
         switch(GetAliveStatus()){
             case KeepAlive::FALSE: exit(EXIT_SUCCESS);
             case KeepAlive::TRUE: return 1;
@@ -101,23 +108,20 @@
         }
     }
     void TCP::Server::AccessingNewConnections(){
+    using namespace std::chrono_literals;
         while(this->GetInfo().GetConnectionStatus() == Connection::OPENED) {
             SockAddr_in address;
             int addr_len {sizeof(address)};
             memset(&address, 0, sizeof(address));
-            // check if it is non-blocking because non block m_flag is set
-            std::cout << "I am before accepting client " << std::endl;
+            std::this_thread::sleep_for(100ms);
             Socket client_socket{accept(this->GetInfo().GetSocket(),
                                         reinterpret_cast<sockaddr *>(&address),
                                         reinterpret_cast<socklen_t*>(&addr_len))};
 
-            std::cout << "I am after accepting client " << std::endl;
             if (this->GetInfo().GetConnectionStatus() != Connection::OPENED) {
-                std::cout << "Return" << std::endl;
                 return;
             }
             if (client_socket <= -1) {
-                std::cout << "Bad client Socket " << std::endl;
                 int error = errno;
                 continue;
             }
@@ -127,9 +131,8 @@
                                                                    ntohl(address.sin_addr.s_addr))));
             unit->SetSocket(client_socket);
             unit->SetConnectionStatus(Connection::OPENED);
-            std::cout << "Before lock" << std::endl;
             std::scoped_lock lock(client_mutex);
-            std::cout << "Here it is a new connection from " << unit->GetIP() << ":" << unit->GetPort() << std::endl;
+            std::cout << "Here is a new connection from " << unit->GetIP() << ":" << unit->GetPort() << std::endl;
             IServer::GetConnections().push_back(std::move(unit));
         }
     }

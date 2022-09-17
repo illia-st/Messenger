@@ -1,8 +1,11 @@
+#pragma once
+
 #include <thread>
 #include <mutex>
 #include <semaphore>
 #include <thread>
 #include <iostream>
+#include <fcntl.h>
 #include "IServer.h"
 
 #ifdef WIN32
