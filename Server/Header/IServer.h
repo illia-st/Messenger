@@ -5,23 +5,8 @@
 #include <list>
 #include <memory>
 #include <atomic>
-#include <forward_list>
-#include "../../Common/Header/CommunicationUnit.h"
+#include "../../Common/Header/Core.h"
 
-namespace TCP {
-
-    using ServerInfo = CommunicationUnit;
-    using ConnectionsList = std::list<std::shared_ptr<CommunicationUnit>>;
-
-    enum class KeepAlive {
-        TRUE,
-        FALSE
-    };
-
-    class IServer;
-
-    class Server;
-}
 // we will inher from TCP, we need to have incapsulaated server info
     class TCP::IServer {
     protected:
