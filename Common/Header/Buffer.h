@@ -7,7 +7,8 @@ namespace TCP{
     constexpr size_t MaxBufferSize = 1500;
     enum class Flag: uint8_t{
         DefaultMsg,
-        MessengerMsg
+        MessengerMsg,
+        Disconnect = 100
     };
     namespace {
         template<size_t N = MaxBufferSize>

@@ -25,27 +25,22 @@ namespace TCP {
         con = Connection::CLOSED;
     }
 
-    HiddenBuffer<>* CommunicationUnit::LoadData() {
+    std::pair<HiddenBuffer<>*, size_t> CommunicationUnit::LoadData() {
         char * buf = new char[MaxBufferSize]{};
         int ans = recv(this->GetSocket(), buf, MaxBufferSize, MSG_DONTWAIT);
 //        std::cout << ans << std::endl;
         if(ans == -1){
             delete [] buf;
-            return nullptr;
+            return {nullptr, 0};
         }
-//        for(size_t i{}; i < 10; ++i){
-//            std::cout << buf[i] << " ";
-//        }
-//        std::cout << std::endl;
         std::cout << "Something was accepted" << std::endl;
         auto BufferPtr {reinterpret_cast<HiddenBuffer<>*>(buf)};
         if(ans == 0){
-            std::cout << "Giving a hundred" << std::endl;
-            BufferPtr->SetFlag(100);
+            BufferPtr->SetFlag(static_cast<uint8_t>(Flag::Disconnect));
         }
-        BufferPtr->SetSize(ans);
+//        BufferPtr->SetSize(ans);
 //        std::cout << BufferPtr->GetFlag() << std::endl;
-        return BufferPtr;
+        return {BufferPtr, ans};
     }
 
     int CommunicationUnit::Disconnect() {

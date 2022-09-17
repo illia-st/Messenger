@@ -59,38 +59,43 @@
     }
 
     void TCP::Server::LoadData() {
+#define accepted_buf result.first
+#define accepted_bytes result.second
         using namespace std::chrono_literals;
         while(this->GetInfo().GetConnectionStatus() == Connection::OPENED){
             std::this_thread::sleep_for(200ms);
-            std::cout << "We are running" << std::endl;
             ConnectionsList& cons {this->GetConnections()};
             std::scoped_lock lock(client_mutex);
-//            std::cout << "Connections number " << cons.size() << std::endl;
             for(auto unit {cons.begin()}; unit != cons.end(); ){
-//                auto client {dynamic_cast<ClientUnit*>(unit->get())};
-//                std::cout << "Connection " << (*unit)->GetIP() << ":" << (*unit)->GetPort() << std::endl;
-                std::cout << "Looped" << std::endl;
                 auto client {unit->get()};
                 auto result {client->LoadData()};
-                if(result == nullptr){
-//                    client->Disconnect();
-//                    unit = cons.erase(unit);
-                    continue;
+                if(accepted_buf == nullptr){
+                    goto INCREMENTOR;
                 }
-//                char * arr = reinterpret_cast<char *>(result);
-//                std::cout << arr << std::endl;
-                switch(static_cast<Flag>(result->GetFlag())){
+                std::cout << "A message from " << (*unit)->GetIP() << ":" << (*unit)->GetPort() << std::endl;
+
+                switch(static_cast<Flag>(accepted_buf->GetFlag())){
                     case Flag::DefaultMsg:{
-                        printMsg(result->GetInfo(), result->GetSize());
+                        //// A message which is suitable for the server and can be parsed correctly by buffer interface
+                        printMsg(accepted_buf->GetInfo(), accepted_buf->GetSize());
                         break;
                     }
                     case Flag::MessengerMsg:{
+                        //// A message which is suitable for the server and can be parsed correctly by buffer interface
+                        break;
+                    }
+                    case Flag::Disconnect:{
+                        std::cout << "A disconnect from " << (*unit)->GetIP() << ":" << (*unit)->GetPort() << std::endl;
+                        client->Disconnect();
+                        unit = cons.erase(unit);
                         break;
                     }
                     default:
-                        printMsg(reinterpret_cast<char *>(result), result->GetSize());
+                        printMsg(reinterpret_cast<char *>(accepted_buf), accepted_bytes);
                         break;
                 }
+                delete [] reinterpret_cast<char *>(accepted_buf);
+                INCREMENTOR:
                 ++unit;
             }
         }
@@ -114,7 +119,6 @@
             if (client_socket <= -1) {
                 std::cout << "Bad client Socket " << std::endl;
                 int error = errno;
-                // make log about error
                 continue;
             }
             std::cout << "Socket is fine" << std::endl;
@@ -126,8 +130,7 @@
             std::cout << "Before lock" << std::endl;
             std::scoped_lock lock(client_mutex);
             std::cout << "Here it is a new connection from " << unit->GetIP() << ":" << unit->GetPort() << std::endl;
-            IServer::GetConnections().pop_front(std::move(unit));
-
+            IServer::GetConnections().push_back(std::move(unit));
         }
     }
 

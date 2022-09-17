@@ -11,7 +11,7 @@
 namespace TCP {
 
     using ServerInfo = CommunicationUnit;
-    using ConnectionsList = std::forward_list<std::shared_ptr<CommunicationUnit>>;
+    using ConnectionsList = std::list<std::shared_ptr<CommunicationUnit>>;
 
     enum class KeepAlive {
         TRUE,

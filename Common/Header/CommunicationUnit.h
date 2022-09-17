@@ -37,7 +37,7 @@ namespace TCP {
 
         virtual int Disconnect();
 
-        virtual HiddenBuffer<>* LoadData();
+        virtual std::pair<HiddenBuffer<>*, size_t> LoadData();
 
         int SendMsg(const char *buf, size_t N);
 
